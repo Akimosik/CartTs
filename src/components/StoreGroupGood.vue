@@ -1,8 +1,7 @@
 <template>
-  <div :class="isExpensive ? 'bg-red-300' : 'bg-white'">
+  <div :class="isExpensive ? 'bg-red-300' : 'bg-green-300'">
     <p>Наименование :{{ StoreGood.Name }}</p>
     <p>Цена :{{ StoreGood.C * ExchangeRate }}</p>
-    <!-- <button @click="AddToCart(StoreGood)">Добавить в корзину</button> -->
     <button
       class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
       @click="emit('add-to-cart', StoreGood)"

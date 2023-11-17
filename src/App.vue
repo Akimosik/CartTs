@@ -20,6 +20,7 @@
     @removeFromCart="removeFromCart"
     @updateQuantity="updateQuantity"
   />
+  <p>Сумма : {{ sumofCart() }}</p>
   <!-- </p> -->
 </template>
 
@@ -34,7 +35,9 @@ import type { RootGoods } from './types/Data/RootGoods'
 import type { SortedData } from './types/Data/SortedData'
 import type { RootNames } from './types/Names/RootNames'
 
-let items: RootGoods = Mygoods
+let items = ref<RootGoods>(Mygoods)
+// let items: RootGoods = Mygoods
+let cartSum = ref<number>()
 let names: RootNames = MyNames
 let isExpensive = ref(false)
 
@@ -50,7 +53,7 @@ watch(ExchangeRate, (newObj, oldObj) => {
   }
 })
 
-items.Value.Goods.forEach((el: Good) => {
+items.value.Value.Goods.forEach((el: Good) => {
   el.GroupName = names[el.G as keyof typeof names].G
   el.Name = names[el.G as keyof typeof names].B[el.T].N
   el.CartQuantity = 0
@@ -67,20 +70,31 @@ const formatData = (data: Good[]) =>
 
 setInterval(() => {
   ExchangeRate.value = random(20, 80)
+  items.value = Mygoods
 }, 5000)
 
-let sortedarray = ref<SortedData>(formatData(items.Value.Goods))
+let sortedarray = ref<SortedData>(formatData(items.value.Value.Goods))
 
 let Cart = ref<Good[]>([])
+
+const sumofCart = () => {
+  if (cartSum.value !== undefined) {
+    return cartSum.value * ExchangeRate.value
+  }
+}
 
 const addToCart = (Good: Good) => {
   if (Cart.value.find((el) => el.T === Good.T)) {
     if (Good.CartQuantity !== undefined) {
       Good.CartQuantity++
+      cartSum.value = Cart.value.reduce((n, { C, CartQuantity }) => n + C * Good.CartQuantity, 0)
+      sumofCart()
     }
   } else {
     Cart.value.push(Good)
     Good.CartQuantity = 1
+    cartSum.value = Cart.value.reduce((n, { C }) => n + C, 0)
+    sumofCart()
   }
 }
 
@@ -89,7 +103,7 @@ const removeFromCart = (Good: Good) => {
   Cart.value = Cart.value.filter((element) => {
     return element !== Good
   })
-  // Cart.value.push(Good)
+  cartSum.value = Cart.value.reduce((n, { C }) => n + C, 0)
 }
 
 const updateQuantity = (Good: Good, quantity: number) => {

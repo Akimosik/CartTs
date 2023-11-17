@@ -1,13 +1,9 @@
 <template>
-  <div :class="isExpensive ? 'bg-red-300' : 'bg-white'">
+  <div :class="isExpensive ? 'bg-red-300' : 'bg-green-300'">
     <p>Наименование :{{ StoreGood.Name }}</p>
+    <p>Количество в корзине :{{ StoreGood.CartQuantity }}</p>
     <p>Цена :{{ StoreGood.C * ExchangeRate }}</p>
-    <input
-      type="number"
-      id="inpcartgood"
-      v-model.number="localquantity"
-      @input="emit('update-quantity', StoreGood, localquantity)"
-    />
+    <p v-show="StoreGood.P < 3" class="bg-yellow-300">Количество ограничено!</p>
     <button
       class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
       @click="removeFromCart(StoreGood)"
@@ -19,32 +15,18 @@
 
 <script lang="ts" setup>
 import { type Good } from '@/types/Data/Good'
-import { onUpdated, ref } from 'vue'
 interface Props {
   StoreGood: Good
   ExchangeRate: number
   isExpensive: boolean
 }
-const props = defineProps<Props>()
-// const editCartQuantity = (StoreGood: Good) => {
-//   if (StoreGood.CartQuantity){
-//     StoreGood.CartQuantity = localquantity
-//   }
-// }
+defineProps<Props>()
 
 const removeFromCart = (StoreGood: Good) => {
   emit('remove-from-cart', StoreGood)
 }
 
-const emit = defineEmits(['remove-from-cart', 'update-quantity'])
-
-const localquantity = ref<number | undefined>(props.StoreGood.CartQuantity)
-
-onUpdated(() => {
-  if (props.StoreGood.CartQuantity !== undefined) {
-    localquantity.value = props.StoreGood.CartQuantity
-  }
-})
+const emit = defineEmits(['remove-from-cart'])
 </script>
 
 <style lang="scss" scoped></style>

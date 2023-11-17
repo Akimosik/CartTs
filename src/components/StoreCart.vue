@@ -5,7 +5,6 @@
       :ExchangeRate="ExchangeRate"
       :isExpensive="isExpensive"
       @removeFromCart="emit('remove-from-cart', StoreGood)"
-      @update-quantity="updateQuantity"
     />
   </div>
 </template>
@@ -17,10 +16,6 @@ interface Props {
   ExchangeRate: number
   Cart: Good[]
   isExpensive: boolean
-}
-
-const updateQuantity = (StoreGood: Good, quantity: number) => {
-  emit('update-quantity', StoreGood, quantity)
 }
 
 const emit = defineEmits(['remove-from-cart', 'update-quantity'])
