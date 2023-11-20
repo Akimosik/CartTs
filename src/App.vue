@@ -20,7 +20,7 @@
     @removeFromCart="removeFromCart"
     @updateQuantity="updateQuantity"
   />
-  <p>Сумма : {{ sumofCart() }}</p>
+  <p>Сумма : {{ cartSum }}</p>
   <!-- </p> -->
 </template>
 
@@ -44,14 +44,6 @@ let isExpensive = ref(false)
 const random = (min: number, max: number): number => Math.floor(Math.random() * (max - min)) + min
 
 let ExchangeRate = ref(random(20, 80))
-
-watch(ExchangeRate, (newObj, oldObj) => {
-  if (newObj > oldObj) {
-    isExpensive.value = true
-  } else {
-    isExpensive.value = false
-  }
-})
 
 items.value.Value.Goods.forEach((el: Good) => {
   el.GroupName = names[el.G as keyof typeof names].G
@@ -77,24 +69,26 @@ let sortedarray = ref<SortedData>(formatData(items.value.Value.Goods))
 
 let Cart = ref<Good[]>([])
 
-const sumofCart = () => {
-  if (cartSum.value !== undefined) {
-    return cartSum.value * ExchangeRate.value
-  }
+function sumofCart(): number {
+  return Cart.value.reduce((acc: number, good: Good) => {
+    let newReducedValue = acc
+    if (good.PriceInCart !== undefined) {
+      newReducedValue = acc + good.PriceInCart
+    }
+    return newReducedValue
+  }, 0)
 }
 
 const addToCart = (Good: Good) => {
   if (Cart.value.find((el) => el.T === Good.T)) {
     if (Good.CartQuantity !== undefined) {
       Good.CartQuantity++
-      cartSum.value = Cart.value.reduce((n, { C, CartQuantity }) => n + C * Good.CartQuantity, 0)
-      sumofCart()
+      Good.PriceInCart = Good.CartQuantity * Good.C
     }
   } else {
     Cart.value.push(Good)
     Good.CartQuantity = 1
-    cartSum.value = Cart.value.reduce((n, { C }) => n + C, 0)
-    sumofCart()
+    Good.PriceInCart = Good.CartQuantity * Good.C
   }
 }
 
@@ -103,12 +97,31 @@ const removeFromCart = (Good: Good) => {
   Cart.value = Cart.value.filter((element) => {
     return element !== Good
   })
-  cartSum.value = Cart.value.reduce((n, { C }) => n + C, 0)
 }
 
 const updateQuantity = (Good: Good, quantity: number) => {
   Good.CartQuantity = quantity
 }
+
+watch(ExchangeRate, (newValue, oldValue) => {
+  if (newValue > oldValue) {
+    isExpensive.value = true
+  } else {
+    isExpensive.value = false
+  }
+  if (cartSum.value !== undefined) {
+    cartSum.value = sumofCart() * newValue
+  }
+})
+
+watch(
+  Cart,
+  () => {
+    console.log('privet')
+    cartSum.value = sumofCart() * ExchangeRate.value
+  },
+  { deep: true }
+)
 </script>
 
 <style>

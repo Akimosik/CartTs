@@ -9,4 +9,5 @@ export interface Good {
   Name?: string
   GroupName?: string
   CartQuantity?: number
+  PriceInCart?: number
 }
